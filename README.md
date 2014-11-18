@@ -3,11 +3,11 @@
 </p>
 <h1 align="center">RRMessageController</h1>
 
-</br>
+<br>
 RRMessageController is a UIViewController, allows you to write a message with photos as attachment.
 A messages UI for iPhone. Support text && image.
 
-</br>
+<br>
 <p align="center">
   <img src ="https://raw.githubusercontent.com/remirobert/RRMessageController/master/ressources/record.gif"/>
 </p>
