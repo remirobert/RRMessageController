@@ -100,6 +100,7 @@
         CGFloat positionY = self.textView.frame.origin.y + self.textView.frame.size.height / 2;
         CGFloat sizeHeigth = self.textView.frame.size.height / 2;
         
+        collectionView.userInteractionEnabled = NO;
         [UIView animateWithDuration:0.5 animations:^{
             self.textView.frame = CGRectMake(self.textView.frame.origin.x, self.textView.frame.origin.y,
                                              self.textView.frame.size.width, self.textView.frame.size.height / 2);
@@ -115,6 +116,7 @@
             [self addPhotoSelectedView:[self.photosThumbnailLibrairy objectAtIndex:indexPath.row]
                        initialPosition:[collectionView cellForItemAtIndexPath:indexPath].frame.origin];
             [self.selectedPhotos addObject:[self.photosThumbnailLibrairy objectAtIndex:indexPath.row]];
+            collectionView.userInteractionEnabled = YES;
         }];
     }
     else {
