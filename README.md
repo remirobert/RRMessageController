@@ -4,6 +4,11 @@
 <h1 align="center">RRMessageController</h1>
 
 <br>
+
+[![Version](https://img.shields.io/cocoapods/v/RRMessageController.svg?style=flat)](http://cocoadocs.org/docsets/RRMessageController)
+[![License](https://img.shields.io/cocoapods/l/RRMessageController.svg?style=flat)](http://cocoadocs.org/docsets/RRMessageController)
+[![Platform](https://img.shields.io/cocoapods/p/RRMessageController.svg?style=flat)](http://cocoadocs.org/docsets/RRMessageController)
+
 RRMessageController is a UIViewController, allows you to write a message with photos as attachment.
 A messages UI for iPhone. Support text && image.
 
@@ -12,6 +17,13 @@ A messages UI for iPhone. Support text && image.
   <img src ="https://raw.githubusercontent.com/remirobert/RRMessageController/master/ressources/record.gif"/>
 </p>
 </br>
+
+<h3 align="center">Installation</h3>
+
+RRMessageController is available through [CocoaPods](http://cocoapods.org). To install
+it, simply add the following line to your Podfile:
+
+    pod "RRMessageController"
 
 <h3 align="center">Usage</h3>
 <hr>
