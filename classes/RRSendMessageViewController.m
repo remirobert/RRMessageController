@@ -17,16 +17,21 @@
 @property (nonatomic, strong) UILabel *numberLine;
 @property (nonatomic, strong) NSMutableArray *photosThumbnailLibrairy;
 @property (nonatomic, strong) NSMutableArray *selectedPhotos;
+@property (nonatomic, strong) NSMutableArray *defaultSelectedPhotos;
 @property (nonatomic, strong) UICollectionView *photosCollection;
 @property (nonatomic, strong) RRCustomScrollView *selectedPhotosView;
+@property (nonatomic, assign) BOOL isDefaultMessage;
 @property (nonatomic, assign) BOOL state;
 
 @property (nonatomic, strong) void (^completion)(RRMessageModel *model, BOOL isCancel);
 @end
 
-# define CELL_PHOTO_IDENTIFIER  @"photoLibraryCell"
-# define CLOSE_PHOTO_IMAGE      @"close"
-# define ADD_PHOTO_IMAGE        @"photo"
+# define CELL_PHOTO_IDENTIFIER      @"photoLibraryCell"
+# define CLOSE_PHOTO_IMAGE          @"close"
+# define ADD_PHOTO_IMAGE            @"camera"
+# define LEFT_BUTTON                @"cancel"
+# define RIGHT_BUTTON               @"post"
+# define TITLE_CONTROLLER           @"New message"
 
 @implementation RRSendMessageViewController
 
@@ -199,7 +204,7 @@
                 }
             }];
         } failureBlock: ^(NSError *error) {
-            NSLog(@"No groups");
+            NSLog(@"No groups photos");
         }];
     }
     else {
@@ -245,8 +250,7 @@
 
 # pragma mark notification keyboard
 
-- (void)notificationKeyboardUp:(NSNotification*)notification
-{
+- (void)notificationKeyboardUp:(NSNotification*)notification {
     NSDictionary* keyboardInfo = [notification userInfo];
     NSValue* keyboardFrameBegin = [keyboardInfo valueForKey:UIKeyboardFrameBeginUserInfoKey];
     CGRect keyboardFrameBeginRect = [keyboardFrameBegin CGRectValue];
@@ -267,6 +271,23 @@
     
     self.photosCollection.frame = CGRectMake(0, self.view.frame.size.height - keyboardFrameBeginRect.size.height,
                                              self.view.frame.size.width, keyboardFrameBeginRect.size.height);
+    
+    if (self.isDefaultMessage == true) {
+        self.textView.frame = CGRectMake(self.textView.frame.origin.x, self.textView.frame.origin.y,
+                                         self.textView.frame.size.width, self.textView.frame.size.height / 2);
+        
+        CGFloat positionY = self.textView.frame.origin.y + self.textView.frame.size.height;
+        CGFloat sizeHeigth = self.textView.frame.size.height;
+        self.selectedPhotosView.frame = CGRectMake(self.textView.frame.origin.x, positionY,
+                                                   self.textView.frame.size.width, sizeHeigth);
+        
+        for (UIImage *currentPhoto in self.defaultSelectedPhotos) {
+            [self addPhotoSelectedView:currentPhoto
+                       initialPosition:CGRectMake(0, self.view.frame.size.height / 2, 0, 0).origin];
+            [self.selectedPhotos addObject:currentPhoto];
+        }
+        self.isDefaultMessage = false;
+    }
 }
 
 # pragma mark init interface
@@ -330,12 +351,12 @@
     self.navigationBar = [[UINavigationBar alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 64)];
     self.navigationBar.backgroundColor = [UIColor colorWithWhite:0.846 alpha:1.000];
     
-    UIBarButtonItem *rightButton = [[UIBarButtonItem alloc] initWithTitle:@"Post"
+    UIBarButtonItem *rightButton = [[UIBarButtonItem alloc] initWithTitle:LEFT_BUTTON
                                                                     style:UIBarButtonItemStyleDone target:self action:@selector(postMessage)];
-    UIBarButtonItem *leftButton = [[UIBarButtonItem alloc] initWithTitle:@"Cancel"
+    UIBarButtonItem *leftButton = [[UIBarButtonItem alloc] initWithTitle:RIGHT_BUTTON
                                                                    style:UIBarButtonItemStyleDone target:self action:@selector(cancelMessage)];
     
-    UINavigationItem *item = [[UINavigationItem alloc] initWithTitle:@"Nouveau message"];
+    UINavigationItem *item = [[UINavigationItem alloc] initWithTitle:TITLE_CONTROLLER];
     item.rightBarButtonItem = rightButton;
     item.leftBarButtonItem = leftButton;
     item.hidesBackButton = YES;
@@ -350,7 +371,7 @@
                                                  name:UIKeyboardDidShowNotification object:nil];
 }
 
-- (void) presentController:(UIViewController *)parentController :(void (^)(RRMessageModel *model, BOOL isCancel))completion {
+- (void) presentController:(UIViewController *)parentController blockCompletion:(void (^)(RRMessageModel *model, BOOL isCancel))completion {
     [parentController presentViewController:self animated:true completion:nil];
     self.completion = completion;
 }
@@ -363,10 +384,8 @@
     if (self != nil) {
         [self initUI];
         self.textView.text = message.text;
-        self.selectedPhotos = message.photos;
-        for (UIImage *currentPhoto in self.selectedPhotos) {
-            [self addPhotoSelectedView:currentPhoto initialPosition:CGRectZero.origin];
-        }
+        self.defaultSelectedPhotos = message.photos;
+        self.isDefaultMessage = true;
     }
     return (self);
 }
