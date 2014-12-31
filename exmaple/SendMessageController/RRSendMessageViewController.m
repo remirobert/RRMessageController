@@ -20,7 +20,6 @@
 @property (nonatomic, strong) NSMutableArray *defaultSelectedPhotos;
 @property (nonatomic, strong) UICollectionView *photosCollection;
 @property (nonatomic, strong) RRCustomScrollView *selectedPhotosView;
-@property (nonatomic, assign) BOOL isDefaultMessage;
 @property (nonatomic, assign) BOOL state;
 
 @property (nonatomic, strong) void (^completion)(RRMessageModel *model, BOOL isCancel);
@@ -272,7 +271,7 @@
     self.photosCollection.frame = CGRectMake(0, self.view.frame.size.height - keyboardFrameBeginRect.size.height,
                                              self.view.frame.size.width, keyboardFrameBeginRect.size.height);
     
-    if (self.isDefaultMessage == true) {
+    if (self.defaultSelectedPhotos != nil) {
         self.textView.frame = CGRectMake(self.textView.frame.origin.x, self.textView.frame.origin.y,
                                          self.textView.frame.size.width, self.textView.frame.size.height / 2);
         
@@ -286,7 +285,7 @@
                        initialPosition:CGRectMake(0, self.view.frame.size.height / 2, 0, 0).origin];
             [self.selectedPhotos addObject:currentPhoto];
         }
-        self.isDefaultMessage = false;
+        self.defaultSelectedPhotos = nil;
     }
 }
 
@@ -385,7 +384,6 @@
         [self initUI];
         self.textView.text = message.text;
         self.defaultSelectedPhotos = message.photos;
-        self.isDefaultMessage = true;
     }
     return (self);
 }
