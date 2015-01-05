@@ -19,8 +19,7 @@ UICollectionViewDataSource, UITextViewDelegate>
 
 @property (nonatomic, assign) NSInteger numberPhoto;
 
-- (void) presentController:(UIViewController *)parentController :(void (^)(RRMessageModel *model, BOOL isCancel))completion;
-
+- (void) presentController:(UIViewController *)parentController blockCompletion:(void (^)(RRMessageModel *model, BOOL isCancel))completion;
 @end
 
 @protocol RRSendMessageDelegate <NSObject>
