@@ -350,9 +350,9 @@
     self.navigationBar = [[UINavigationBar alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 64)];
     self.navigationBar.backgroundColor = [UIColor colorWithWhite:0.846 alpha:1.000];
     
-    UIBarButtonItem *rightButton = [[UIBarButtonItem alloc] initWithTitle:LEFT_BUTTON
+    UIBarButtonItem *rightButton = [[UIBarButtonItem alloc] initWithTitle:RIGHT_BUTTON
                                                                     style:UIBarButtonItemStyleDone target:self action:@selector(postMessage)];
-    UIBarButtonItem *leftButton = [[UIBarButtonItem alloc] initWithTitle:RIGHT_BUTTON
+    UIBarButtonItem *leftButton = [[UIBarButtonItem alloc] initWithTitle:LEFT_BUTTON
                                                                    style:UIBarButtonItemStyleDone target:self action:@selector(cancelMessage)];
     
     UINavigationItem *item = [[UINavigationItem alloc] initWithTitle:TITLE_CONTROLLER];
