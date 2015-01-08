@@ -25,6 +25,8 @@ it, simply add the following line to your Podfile:
 
     pod "RRMessageController"
 
+>**RRMessageController needs AVFoundation Framework**
+
 <h3 align="center">Usage</h3>
 <hr>
 <p align="center">With block :</p>
