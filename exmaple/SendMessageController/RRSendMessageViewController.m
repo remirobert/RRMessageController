@@ -23,14 +23,19 @@
 @property (nonatomic, assign) BOOL state;
 
 @property (nonatomic, strong) void (^completion)(RRMessageModel *model, BOOL isCancel);
+
+@property (nonatomic, strong) AVCaptureSession *session;
+@property (nonatomic, strong) AVCaptureVideoPreviewLayer *captureVideoPreviewLayer;
+@property (nonatomic, strong) UIImageView *currentImage;
 @end
 
 # define CELL_PHOTO_IDENTIFIER      @"photoLibraryCell"
+# define CELL_PREVIEW_IDENTIFIER    @"previewCell"
 # define CLOSE_PHOTO_IMAGE          @"close"
 # define ADD_PHOTO_IMAGE            @"camera"
-# define LEFT_BUTTON                @"cancel"
-# define RIGHT_BUTTON               @"post"
-# define TITLE_CONTROLLER           @"New message"
+# define LEFT_BUTTON                @"annuler"
+# define RIGHT_BUTTON               @"poster"
+# define TITLE_CONTROLLER           @"Nouveau message"
 
 @implementation RRSendMessageViewController
 
@@ -83,7 +88,19 @@
 #pragma mark UICollectionView delegate
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
-    return (self.photosThumbnailLibrairy.count);
+    return (self.photosThumbnailLibrairy.count + 1);
+}
+
+- (void) collectionView:(UICollectionView *)collectionView willDisplayCell:(UICollectionViewCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath {
+    if (indexPath.row == 0) {
+        self.currentImage = ((UICollectionViewCellPhoto *)cell).photo;
+    }
+}
+
+- (void) collectionView:(UICollectionView *)collectionView didEndDisplayingCell:(UICollectionViewCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath {
+    if (indexPath.row == 0) {
+        self.currentImage = nil;
+    }
 }
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView
@@ -91,20 +108,20 @@
     UICollectionViewCellPhoto *cell = [collectionView
                                        dequeueReusableCellWithReuseIdentifier:CELL_PHOTO_IDENTIFIER
                                        forIndexPath:indexPath];
-    
-    cell.photo.image = [self.photosThumbnailLibrairy objectAtIndex:indexPath.row];
+    if (indexPath.row > 0)
+        cell.photo.image = [self.photosThumbnailLibrairy objectAtIndex:indexPath.row - 1];
+    [cell setNeedsDisplay];
     return (cell);
 }
 
-- (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath {
-    if (self.numberPhoto != -1 && self.selectedPhotos.count >= self.numberPhoto) {
-        return  ;
-    }
+- (void) addNewPhotoSelected:(UIImage *)photo withIndexPath:(NSIndexPath *)indexPath {
+    CGPoint startPosition = (indexPath) ? [self.photosCollection cellForItemAtIndexPath:indexPath].frame.origin : CGPointZero;
     if (self.selectedPhotos.count == 0) {
         CGFloat positionY = self.textView.frame.origin.y + self.textView.frame.size.height / 2;
         CGFloat sizeHeigth = self.textView.frame.size.height / 2;
         
-        collectionView.userInteractionEnabled = NO;
+        
+        self.photosCollection.userInteractionEnabled = NO;
         [UIView animateWithDuration:0.5 animations:^{
             self.textView.frame = CGRectMake(self.textView.frame.origin.x, self.textView.frame.origin.y,
                                              self.textView.frame.size.width, self.textView.frame.size.height / 2);
@@ -117,17 +134,128 @@
             self.selectedPhotosView.frame = CGRectMake(self.textView.frame.origin.x, positionY,
                                                        self.textView.frame.size.width, sizeHeigth);
         } completion:^(BOOL finished) {
-            [self addPhotoSelectedView:[self.photosThumbnailLibrairy objectAtIndex:indexPath.row]
-                       initialPosition:[collectionView cellForItemAtIndexPath:indexPath].frame.origin];
-            [self.selectedPhotos addObject:[self.photosThumbnailLibrairy objectAtIndex:indexPath.row]];
-            collectionView.userInteractionEnabled = YES;
+            [self addPhotoSelectedView:photo
+                       initialPosition:startPosition];
+            [self.selectedPhotos addObject:photo];
+            self.photosCollection.userInteractionEnabled = YES;
         }];
     }
     else {
-        [self addPhotoSelectedView:[self.photosThumbnailLibrairy objectAtIndex:indexPath.row]
-                   initialPosition:[collectionView cellForItemAtIndexPath:indexPath].frame.origin];
-        [self.selectedPhotos addObject:[self.photosThumbnailLibrairy objectAtIndex:indexPath.row]];
+        [self addPhotoSelectedView:photo
+                   initialPosition:startPosition];
+        [self.selectedPhotos addObject:photo];
     }
+}
+
+- (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath {
+    if (indexPath.row == 0) {
+        [self postUIImagePickerController];
+        return ;
+    }
+    else if (self.numberPhoto != -1 && self.selectedPhotos.count >= self.numberPhoto) {
+        return  ;
+    }
+    [self addNewPhotoSelected:[self.photosThumbnailLibrairy objectAtIndex:indexPath.row - 1] withIndexPath:indexPath];
+}
+
+# pragma mark UIPickerController
+
+- (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info {
+    UIImage *chosenImage = [info objectForKey:UIImagePickerControllerOriginalImage];
+    [picker dismissViewControllerAnimated:true completion:^{
+        if (chosenImage)
+            [self addNewPhotoSelected:chosenImage withIndexPath:nil];
+        [self initAVFoundation];
+    }];
+}
+- (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker {
+    [picker dismissViewControllerAnimated:true completion:^{
+        [self initAVFoundation];
+    }];
+}
+
+- (void) postUIImagePickerController {
+    [self.session stopRunning];
+    UIImagePickerController *picker = [[UIImagePickerController alloc] init];
+    picker.delegate = self;
+    picker.allowsEditing = NO;
+    picker.sourceType = UIImagePickerControllerSourceTypeCamera;
+    
+    [self presentViewController:picker animated:YES completion:NULL];
+}
+
+# pragma mark AVFoundation
+
+- (void) imageFromSampleBuffer:(CMSampleBufferRef) sampleBuffer {
+    CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
+    CVPixelBufferLockBaseAddress(imageBuffer, 0);
+    void *baseAddress = CVPixelBufferGetBaseAddress(imageBuffer);
+    
+    size_t bytesPerRow = CVPixelBufferGetBytesPerRow(imageBuffer);
+    size_t width = CVPixelBufferGetWidth(imageBuffer);
+    size_t height = CVPixelBufferGetHeight(imageBuffer);
+    
+    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+        CGContextRef context = CGBitmapContextCreate(baseAddress, width, height, 8,
+                                                 bytesPerRow, colorSpace, kCGBitmapByteOrder32Little | kCGImageAlphaPremultipliedFirst);
+    CGImageRef quartzImage = CGBitmapContextCreateImage(context);
+    CVPixelBufferUnlockBaseAddress(imageBuffer,0);
+    CGContextRelease(context);
+    CGColorSpaceRelease(colorSpace);
+    UIImage *image = [UIImage imageWithCGImage:quartzImage scale:1.0 orientation:UIImageOrientationRight];
+    CGImageRelease(quartzImage);
+
+    if (self.currentImage) {
+        dispatch_sync(dispatch_get_main_queue(), ^{
+            self.currentImage.image = image;
+        });
+    }
+}
+
+- (void)captureOutput:(AVCaptureOutput *)captureOutput didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
+       fromConnection:(AVCaptureConnection *)connection {
+    [self imageFromSampleBuffer:sampleBuffer];
+}
+
+- (AVCaptureDevice *)backCamera {
+    NSArray *devices = [AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo];
+    for (AVCaptureDevice *device in devices) {
+        if ([device position] == AVCaptureDevicePositionBack) {
+            return (device);
+        }
+    }
+    return (nil);
+}
+
+- (void) initAVFoundation {
+    self.session = [[AVCaptureSession alloc] init];
+    self.session.sessionPreset = AVCaptureSessionPresetHigh;
+    self.captureVideoPreviewLayer = [[AVCaptureVideoPreviewLayer alloc] initWithSession:self.session];
+    [self.captureVideoPreviewLayer setVideoGravity:AVLayerVideoGravityResizeAspectFill];
+    
+    AVCaptureDevice *device = [self backCamera];
+    
+    AVCaptureDeviceInput *input = [AVCaptureDeviceInput deviceInputWithDevice:device error:nil];
+    if (!input) {
+        NSLog(@"Error open input device");
+        return ;
+    }
+    [self.session addInput:input];
+
+    AVCaptureVideoDataOutput *captureOutput =[[AVCaptureVideoDataOutput alloc] init];
+    
+    captureOutput.alwaysDiscardsLateVideoFrames = YES;
+    captureOutput.alwaysDiscardsLateVideoFrames = YES;
+    dispatch_queue_t queue;
+    queue = dispatch_queue_create("cameraQueue", NULL);
+    [captureOutput setSampleBufferDelegate:self queue:queue];
+    NSString* key = (NSString*)kCVPixelBufferPixelFormatTypeKey;
+    NSNumber* value = [NSNumber numberWithUnsignedInt:kCVPixelFormatType_32BGRA];
+    NSDictionary* videoSettings = [NSDictionary dictionaryWithObject:value forKey:key];
+    [captureOutput setVideoSettings:videoSettings];
+    
+    [self.session addOutput:captureOutput];
+    [self.session startRunning];
 }
 
 # pragma mark interface button
@@ -350,9 +478,9 @@
     self.navigationBar = [[UINavigationBar alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 64)];
     self.navigationBar.backgroundColor = [UIColor colorWithWhite:0.846 alpha:1.000];
     
-    UIBarButtonItem *rightButton = [[UIBarButtonItem alloc] initWithTitle:LEFT_BUTTON
+    UIBarButtonItem *rightButton = [[UIBarButtonItem alloc] initWithTitle:RIGHT_BUTTON
                                                                     style:UIBarButtonItemStyleDone target:self action:@selector(postMessage)];
-    UIBarButtonItem *leftButton = [[UIBarButtonItem alloc] initWithTitle:RIGHT_BUTTON
+    UIBarButtonItem *leftButton = [[UIBarButtonItem alloc] initWithTitle:LEFT_BUTTON
                                                                    style:UIBarButtonItemStyleDone target:self action:@selector(cancelMessage)];
     
     UINavigationItem *item = [[UINavigationItem alloc] initWithTitle:TITLE_CONTROLLER];
@@ -373,6 +501,10 @@
 - (void) presentController:(UIViewController *)parentController blockCompletion:(void (^)(RRMessageModel *model, BOOL isCancel))completion {
     [parentController presentViewController:self animated:true completion:nil];
     self.completion = completion;
+}
+
+- (void) viewDidLoad {
+    [self initAVFoundation];
 }
 
 # pragma mark constructor

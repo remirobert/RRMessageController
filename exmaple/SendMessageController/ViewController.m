@@ -18,7 +18,7 @@
 - (void) newMessage {
     RRSendMessageViewController *controller = [[RRSendMessageViewController alloc] init];
     
-    [controller presentController:self :^(RRMessageModel *model, BOOL isCancel) {
+    [controller presentController:self blockCompletion:^(RRMessageModel *model, BOOL isCancel) {
         if (isCancel == true) {
             self.message.text = @"";
         }

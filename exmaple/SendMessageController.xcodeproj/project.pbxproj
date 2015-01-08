@@ -19,6 +19,7 @@
 		BB4FC6B71A1A2BD900BDBD9F /* RRSendMessageViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BB4FC6B61A1A2BD900BDBD9F /* RRSendMessageViewController.m */; };
 		BB4FC6B91A1A389400BDBD9F /* AssetsLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BB4FC6B81A1A389400BDBD9F /* AssetsLibrary.framework */; };
 		BB4FC6F61A1A520100BDBD9F /* UICollectionViewCellPhoto.m in Sources */ = {isa = PBXBuildFile; fileRef = BB4FC6F51A1A520100BDBD9F /* UICollectionViewCellPhoto.m */; };
+		BBA809851A5F254D0018746A /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BBA809841A5F254D0018746A /* AVFoundation.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -54,6 +55,7 @@
 		BB4FC6B81A1A389400BDBD9F /* AssetsLibrary.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AssetsLibrary.framework; path = System/Library/Frameworks/AssetsLibrary.framework; sourceTree = SDKROOT; };
 		BB4FC6F41A1A520100BDBD9F /* UICollectionViewCellPhoto.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UICollectionViewCellPhoto.h; sourceTree = "<group>"; };
 		BB4FC6F51A1A520100BDBD9F /* UICollectionViewCellPhoto.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UICollectionViewCellPhoto.m; sourceTree = "<group>"; };
+		BBA809841A5F254D0018746A /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -61,6 +63,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BBA809851A5F254D0018746A /* AVFoundation.framework in Frameworks */,
 				BB4FC6B91A1A389400BDBD9F /* AssetsLibrary.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -78,6 +81,7 @@
 		BB4FC6831A1A2BC800BDBD9F = {
 			isa = PBXGroup;
 			children = (
+				BBA809841A5F254D0018746A /* AVFoundation.framework */,
 				BB4FC6B81A1A389400BDBD9F /* AssetsLibrary.framework */,
 				BB4FC68E1A1A2BC800BDBD9F /* SendMessageController */,
 				BB4FC6A81A1A2BC900BDBD9F /* SendMessageControllerTests */,
