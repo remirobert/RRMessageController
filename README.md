@@ -10,7 +10,7 @@
 [![Platform](https://img.shields.io/cocoapods/p/RRMessageController.svg?style=flat)](http://cocoadocs.org/docsets/RRMessageController)
 
 RRMessageController is a UIViewController, allows you to write a message with photos as attachment.
-A messages UI for iPhone. Support text && image.
+A messages UI for iPhone. Support text && image. Works with all custom Keyboard for iOS 8.
 
 <br>
 <p align="center">
