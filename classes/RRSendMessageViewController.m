@@ -515,6 +515,7 @@
     if (self != nil) {
         [self initUI];
         self.textView.text = message.text;
+        self.numberLine.text = [NSString stringWithFormat:@"%lu", (unsigned long)self.textView.text.length];
         self.defaultSelectedPhotos = message.photos;
     }
     return (self);
