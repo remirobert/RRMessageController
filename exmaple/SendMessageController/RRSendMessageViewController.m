@@ -32,7 +32,7 @@
 # define CELL_PHOTO_IDENTIFIER      @"photoLibraryCell"
 # define CELL_PREVIEW_IDENTIFIER    @"previewCell"
 # define CLOSE_PHOTO_IMAGE          @"close"
-# define ADD_PHOTO_IMAGE            @"camera"
+# define ADD_PHOTO_IMAGE            @"photo"
 # define LEFT_BUTTON                @"annuler"
 # define RIGHT_BUTTON               @"poster"
 # define TITLE_CONTROLLER           @"Nouveau message"
@@ -515,6 +515,7 @@
     if (self != nil) {
         [self initUI];
         self.textView.text = message.text;
+        self.numberLine.text = [NSString stringWithFormat:@"%lu", (unsigned long)self.textView.text.length];
         self.defaultSelectedPhotos = message.photos;
     }
     return (self);
