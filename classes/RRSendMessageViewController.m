@@ -385,7 +385,7 @@
     self.state = true;
     [UIView animateWithDuration:0.5 animations:^{
         self.textView.frame = CGRectMake(self.textView.frame.origin.x, self.textView.frame.origin.y,
-                                         self.textView.frame.size.width, (self.view.frame.size.height - 64) -
+                                         self.textView.frame.size.width, (self.view.frame.size.height - self.textView.frame.origin.y) -
                                          keyboardFrameBeginRect.size.height - 40 - self.selectedPhotosView.frame.size.height);
     }];
     self.buttonAddPhoto.frame = CGRectMake(self.buttonAddPhoto.frame.origin.x, self.view.frame.size.height -
